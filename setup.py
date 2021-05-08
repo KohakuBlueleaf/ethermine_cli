@@ -14,5 +14,8 @@ setuptools.setup(
     'console_scripts': [
       'ethermine = ethermine.__main__: main',
     ]
-  }
+  },
+  install_requires=[
+    'requests'
+  ]
 )
