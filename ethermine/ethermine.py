@@ -77,8 +77,7 @@ def get_miner_stat(id):
     last_paid = pay['payouts'][0]['paidOn']
     next_paid_time = last_paid+PAYTIME[0]
     
-    duration = (threshold-unpaid)/1e18/(60*hash2pay*avg_24h)
-
+    duration = (threshold-unpaid)/1e18/(hash2pay*avg_24h)*60
     #can exceed the threshold
     if duration<next_paid_time-time():
       next_payout = threshold/1e18
@@ -103,8 +102,8 @@ def get_miner_stat(id):
           next_payout = threshold
   else:
     #first payout
-    duration = (threshold-unpaid)/1e18/(60*hash2pay*avg_24h)
-    next_payout = threshold
+    duration = (threshold-unpaid)/1e18/(hash2pay*avg_24h)*60
+    next_payout = threshold/1e18
 
   daily_profit = 1440*hash2pay*avg_24h
 

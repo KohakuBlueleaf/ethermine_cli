@@ -4,7 +4,7 @@ import setuptools
 setuptools.setup(
   name = 'ethermine_cli',
   packages = ['ethermine'],
-  version = '1.1.1',
+  version = '1.1.2',
   url='https://github.com/KohakuBlueleaf/ethermine_cli',
   description = 'A command-line tool for monitoring the status on ethermin.',
   author = 'BlueLeaf',
