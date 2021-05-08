@@ -81,7 +81,7 @@ def get_miner_stat(id):
 
     #can exceed the threshold
     if duration<next_paid_time-time():
-      next_payout = threshold
+      next_payout = threshold/1e18
 
     #cannot exceed
     #0.05 -> 1week
