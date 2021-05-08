@@ -7,6 +7,7 @@ import csv
 from .utils import *
 
 
+#constant
 API = [
   'https://api.ethermine.org/miner/{}/dashboard',
   'https://api.ethermine.org/miner/{}/dashboard/payouts',
@@ -46,34 +47,62 @@ TEMPLATE = ['''┌────────────────┬───�
 ]
 
 
+#get state from ethermine
 def get_miner_stat(id):
+  #miner data
   data = loads(get(API[0].format(id)).content)['data']
+  #payouts data
   pay = loads(get(API[1].format(id)).content)['data']
+  #setting data
   setting = loads(get(API[3].format(id)).content)['data']
 
+  # 1h = x ETH
   hash2pay = pay['estimates']['coinsPerMin']/pay['estimates']['averageHashrate']
+  #all the hashrate data
   all_hashrate = [i['currentHashrate'] for i in data['statistics']]
 
+  #average of 1 hour and 24 hour
   avg_1h = sum(all_hashrate[-6:])/6
   avg_24h = sum(all_hashrate)/144
+  #reported hashrate
   report = data['currentStatistics']['reportedHashrate']
 
+  #unpaid balance
   unpaid = data['currentStatistics']['unpaid']
+  #payout threshold
   threshold = setting['minPayout']
+
+  #not first payout
   if pay['payouts']:
     last_paid = pay['payouts'][0]['paidOn']
-    
     next_paid_time = last_paid+PAYTIME[0]
-    duration = next_paid_time-time()
-    next_payout = duration/60*hash2pay*avg_24h+unpaid/1e18
-    if next_payout<0.05:
-      next_paid_time = last_paid+PAYTIME[1]
+    
+    duration = (threshold-unpaid)/1e18/(60*hash2pay*avg_24h)
+
+    #can exceed the threshold
+    if duration<next_paid_time-time():
+      next_payout = threshold
+
+    #cannot exceed
+    #0.05 -> 1week
+    #0.01 -> 2week
+    else:
+      #0.05
       duration = next_paid_time-time()
       next_payout = duration/60*hash2pay*avg_24h+unpaid/1e18
-      if next_payout<0.01:
-        duration = (threshold-unpaid)/1e18/(60*hash2pay*avg_24h)
-        next_payout = threshold
+
+      #0.01
+      if next_payout<0.05:
+        next_paid_time = last_paid+PAYTIME[1]
+        duration = next_paid_time-time()
+        next_payout = duration/60*hash2pay*avg_24h+unpaid/1e18
+
+        #within 0.01
+        if next_payout<0.01:
+          duration = (0.01-unpaid)/1e18/(60*hash2pay*avg_24h)
+          next_payout = threshold
   else:
+    #first payout
     duration = (threshold-unpaid)/1e18/(60*hash2pay*avg_24h)
     next_payout = threshold
 
