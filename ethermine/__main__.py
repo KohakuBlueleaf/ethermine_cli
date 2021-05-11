@@ -4,7 +4,7 @@ import shutil
 from argparse import ArgumentParser, RawTextHelpFormatter
 from textwrap import dedent
 from .ethermine import *
-from json import dump
+from json import dump,load
 
 
 parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
@@ -50,10 +50,22 @@ parser.add_argument(
   help='convert output file',
   type=str, default=''
 )
+parser.add_argument(
+  '-C','--config',
+  help='use config to run ethermine-cli',
+  type=str, default=''
+)
 
 def stat(args):
+  if args.config != '':
+    with open(args.config, 'r') as f:
+      config = load(f)
+    for key, val in config.items():
+      setattr(args, key, val)
+      
   if args.id == '':
     raise ValueError('id is not set')
+
   path = args.path.strip('/')
   while True:
     get_stat(args.id, True, args.worker, args.log, path)
